@@ -1,0 +1,52 @@
+defmodule TR do
+  @moduledoc """
+  This provides easier access to `:tr` module.
+  """
+
+  @source :tr
+
+  # record helper to ease pattern matching
+  require Record
+  Record.defrecord(@source,
+    index: nil,
+    pid: nil,
+    event: :call,
+    mfa: nil,
+    data: nil,
+    ts: nil
+  )
+
+  # capturing, data manipulation
+  defdelegate start_link, to: @source
+  defdelegate start_link(opts), to: @source
+  defdelegate start, to: @source
+  defdelegate start(opts), to: @source
+  defdelegate trace_calls(modules), to: @source
+  defdelegate stop_tracing_calls, to: @source
+  defdelegate stop, to: @source
+  defdelegate tab, to: @source
+  defdelegate set_tab(tab), to: @source
+  defdelegate load(file), to: @source
+  defdelegate dump(file), to: @source
+  defdelegate clean, to: @source
+
+  # analysis
+  defdelegate select, to: @source
+  defdelegate select(selector_fun), to: @source
+  defdelegate select(selector_fun, data_value), to: @source
+  defdelegate filter(predicate), to: @source
+  defdelegate filter(predicate, tab), to: @source
+  defdelegate filter_tracebacks(predicate), to: @source
+  defdelegate filter_tracebacks(predicate, tab), to: @source
+  defdelegate filter_ranges(predicate), to: @source
+  defdelegate filter_ranges(predicate, opts), to: @source
+  defdelegate print_sorted_call_stat(selector_fun, length), to: @source
+  defdelegate sorted_call_stat(selector_fun), to: @source
+  defdelegate call_stat(selector_fun), to: @source
+  defdelegate call_stat(selector_fun, tab), to: @source
+
+  # utilities
+  defdelegate contains_data(data_value, trace), to: @source
+  defdelegate call_selector(selector_fun), to: @source
+  defdelegate app_modules(app_name), to: @source
+end
