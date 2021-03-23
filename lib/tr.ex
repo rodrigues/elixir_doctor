@@ -9,10 +9,22 @@ defmodule TR do
   # record helper to ease pattern matching
   require Record
 
-  Record.defrecord(
+  @record_config Record.extract(
     @source,
-    Record.extract(@source, from_lib: "erlang_doctor/include/tr.hrl")
+    from_lib: "erlang_doctor/include/tr.hrl"
   )
+
+  @record_keys Keyword.keys(@record_config)
+
+  Record.defrecord(@source, @record_config)
+
+  def record_to_map(tr_record) when elem(tr_record, 0) == :tr do
+    [:tr | rest] = Tuple.to_list(tr_record)
+
+    for {item, index} <- Enum.with_index(rest), into: %{} do
+      {Enum.at(@record_keys, index), item}
+    end
+  end
 
   # capturing, data manipulation
   defdelegate start_link, to: @source
