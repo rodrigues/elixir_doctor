@@ -10,7 +10,7 @@ defmodule ElixirDoctor.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: [
         {:erlang_doctor, "~> 0.1"},
-        {:ex_doc, "~> 0.24.1", only: :docs}
+        {:ex_doc, "~> 0.24.1", only: :dev, runtime: false}
       ],
       package: [
         licenses: ["Apache-2.0"],
