@@ -10,20 +10,28 @@ defmodule TR do
   require Record
 
   @record_config Record.extract(
-    @source,
-    from_lib: "erlang_doctor/include/tr.hrl"
-  )
+                   @source,
+                   from_lib: "erlang_doctor/include/tr.hrl"
+                 )
 
   @record_keys Keyword.keys(@record_config)
 
+  defstruct @record_keys
+
   Record.defrecord(@source, @record_config)
 
-  def record_to_map(tr_record) when elem(tr_record, 0) == :tr do
+  def record_to_struct(tr_record) when elem(tr_record, 0) == :tr do
     [:tr | rest] = Tuple.to_list(tr_record)
 
-    for {item, index} <- Enum.with_index(rest), into: %{} do
-      {Enum.at(@record_keys, index), item}
+    for {value, index} <- Enum.with_index(rest), reduce: %TR{} do
+      %TR{} = struct ->
+        key = Enum.at(@record_keys, index)
+        Map.put(struct, key, value)
     end
+  end
+
+  def records_to_structs(tr_records) when is_list(tr_records) do
+    Enum.map(tr_records, &record_to_struct/1)
   end
 
   # capturing, data manipulation
@@ -41,10 +49,18 @@ defmodule TR do
   defdelegate clean, to: @source
 
   # analysis
-  # TODO make that map compat
-  defdelegate select, to: @source
-  defdelegate select(selector_fun), to: @source
-  defdelegate select(selector_fun, data_value), to: @source
+  def select do
+    records_to_structs(@source.select())
+  end
+
+  def select(selector_fun) do
+    records_to_structs(@source.select(selector_fun))
+  end
+
+  def select(selector_fun, data_value) do
+    records_to_structs(@source.select(selector_fun, data_value))
+  end
+
   defdelegate filter(predicate), to: @source
   defdelegate filter(predicate, tab), to: @source
   defdelegate filter_tracebacks(predicate), to: @source
@@ -60,4 +76,62 @@ defmodule TR do
   defdelegate contains_data(data_value, trace), to: @source
   defdelegate call_selector(selector_fun), to: @source
   defdelegate app_modules(app_name), to: @source
+end
+
+defimpl Inspect, for: TR do
+  import Inspect.Algebra
+
+  def inspect(
+        %TR{
+          index: index,
+          mfa: {mod, fun, arity},
+          pid: pid,
+          ts: ts,
+          event: event,
+          data: data
+        } = tr,
+        _opts
+      ) do
+    mfa = "#{mod_name(mod)}.#{fun}/#{arity}"
+    pid = inspect(pid)
+
+    ts =
+      ts
+      |> DateTime.from_unix!(:microsecond)
+      |> DateTime.to_iso8601()
+
+    data_label = data_label(tr)
+
+    concat([
+      to_string(index),
+      ". ",
+      ts,
+      " ",
+      pid,
+      " ",
+      to_string(event),
+      " ",
+      mfa,
+      flex_break(),
+      to_string(data_label),
+      ": ",
+      Kernel.inspect(data, limit: :infinity)
+    ])
+  end
+
+  defp data_label(%{event: :call}), do: :args
+  defp data_label(%{event: :return_from}), do: :return_value
+  defp data_label(%{event: :exception_from}), do: :error
+
+  defp mod_name(mod) do
+    mod
+    |> to_string()
+    |> case do
+      "Elixir." <> mod ->
+        mod
+
+      mod ->
+        ":#{mod}"
+    end
+  end
 end
