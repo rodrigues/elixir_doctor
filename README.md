@@ -39,4 +39,3 @@ TR.filter(fn tr(event: :call) -> true end)
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/elixir_doctor](https://hexdocs.pm/elixir_doctor).
-
