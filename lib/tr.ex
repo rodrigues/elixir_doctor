@@ -1,19 +1,17 @@
 defmodule TR do
   @moduledoc """
-  This provides easier access to `:tr` module.
+  This provides easier access to `:tr` module,
+  defined by the [erlang_doctor](https://hex.pm/packages/erlang_doctor) package.
   """
 
   @source :tr
 
   # record helper to ease pattern matching
   require Record
-  Record.defrecord(@source,
-    index: nil,
-    pid: nil,
-    event: :call,
-    mfa: nil,
-    data: nil,
-    ts: nil
+
+  Record.defrecord(
+    @source,
+    Record.extract(@source, from_lib: "erlang_doctor/include/tr.hrl")
   )
 
   # capturing, data manipulation
@@ -31,6 +29,7 @@ defmodule TR do
   defdelegate clean, to: @source
 
   # analysis
+  # TODO make that map compat
   defdelegate select, to: @source
   defdelegate select(selector_fun), to: @source
   defdelegate select(selector_fun, data_value), to: @source
