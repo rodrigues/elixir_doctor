@@ -20,7 +20,11 @@ defmodule TR do
 
   Record.defrecord(@source, @record_config)
 
-  def record_to_struct(tr_record) when elem(tr_record, 0) == :tr do
+  @doc ~S"""
+  Converts tr records into structs, which are more
+  inspectable and navigable in Elixir.
+  """
+  def pretty(tr_record) when elem(tr_record, 0) == :tr do
     [:tr | rest] = Tuple.to_list(tr_record)
 
     for {value, index} <- Enum.with_index(rest), reduce: %TR{} do
@@ -30,8 +34,8 @@ defmodule TR do
     end
   end
 
-  def records_to_structs(tr_records) when is_list(tr_records) do
-    Enum.map(tr_records, &record_to_struct/1)
+  def pretty(tr_records) when is_list(tr_records) do
+    Enum.map(tr_records, &pretty/1)
   end
 
   # capturing, data manipulation
@@ -49,18 +53,9 @@ defmodule TR do
   defdelegate clean, to: @source
 
   # analysis
-  def select do
-    records_to_structs(@source.select())
-  end
-
-  def select(selector_fun) do
-    records_to_structs(@source.select(selector_fun))
-  end
-
-  def select(selector_fun, data_value) do
-    records_to_structs(@source.select(selector_fun, data_value))
-  end
-
+  defdelegate select, to: @source
+  defdelegate select(selector_fun), to: @source
+  defdelegate select(selector_fun, data_value), to: @source
   defdelegate filter(predicate), to: @source
   defdelegate filter(predicate, tab), to: @source
   defdelegate filter_tracebacks(predicate), to: @source
