@@ -1,3 +1,3 @@
 %{
-  "erlang_doctor": {:hex, :erlang_doctor, "0.1.0", "830c1fbb8c6826b219993c00b9feb82d43afabf4cb35a5313eb1fc0007cc6397", [:rebar3], [], "hexpm", "77517de3c4a5a785e8d92d96fbb690ef3c0a89e2560da2128c654897c47b9087"},
+  "erlang_doctor": {:hex, :erlang_doctor, "0.1.0", "6583687594a109506b5f8b200174b92689f49aaf335ad75a30d6624da29110db", [:rebar3], [], "hexpm", "df9f240bb1bd92371e74b054b524db02d48e651dfbcd26b10d2a5cf556cfe91d"},
 }

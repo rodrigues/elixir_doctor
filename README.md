@@ -1,6 +1,6 @@
 # ElixirDoctor
 
-Thin elixir to give easier access to `erlang_doctor`.
+Thin library to help using `erlang_doctor` from Elixir.
 
 ## Installation
 
@@ -13,6 +13,27 @@ def deps do
     {:elixir_doctor, "~> 0.1.0"}
   ]
 end
+```
+
+## Usage
+
+```elixir
+
+TR.start()
+TR.trace_calls([Mod1, Mod2])
+
+Mod1.fun()
+
+TR.stop_tracing_calls()
+
+# returns all entries
+TR.select()
+
+# you gotta import TR.tr/1 macro,
+# if you want to do pattern matching on records
+import TR, only: [tr: 1]
+
+TR.filter(fn tr(event: :call) -> true end)
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
