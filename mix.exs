@@ -4,7 +4,7 @@ defmodule ElixirDoctor.MixProject do
   def project do
     [
       app: :elixir_doctor,
-      description: "Tiny wrapper on top of erlang_doctor",
+      description: "Lightweight tracing and debugging on top of erlang_doctor",
       version: "0.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,

@@ -1,8 +1,6 @@
 defmodule TR do
-  @moduledoc """
-  This provides easier access to `:tr` module,
-  defined by the [erlang_doctor](https://hex.pm/packages/erlang_doctor) package.
-  """
+  @external_resource "README.md"
+  @moduledoc "README.md" |> File.read!()
 
   @source :tr
 
