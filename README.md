@@ -2,7 +2,8 @@
 
 Thin library to help using [`erlang_doctor`](https://github.com/chrzaszcz/erlang_doctor) from Elixir.
 
-`erlang_doctor` provides lightweight tracing, debugging and profiling.
+`erlang_doctor` provides lightweight tracing, debugging and profiling,
+backed by `ets`.
 
 ## Installation
 
