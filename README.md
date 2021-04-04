@@ -136,6 +136,47 @@ Now we can see the traces for each recursive `:call` to the function,
 with argument `3`, `2`, `1` and `0`, and their respective returns, traced
 through the `:return_from` events, with return values `1`, `1`, `2`, and finally `6`.
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/elixir_doctor](https://hexdocs.pm/elixir_doctor).
+## Consume traces as structs
+
+In Elixir, records are shown simply as tuples, that might be some times
+a bit harder to understand or manipulate. In case you need, you can convert
+the traces to structs that are more introspectable / navigable, by using
+`TR.pretty/1` function:
+
+```elixir
+iex(7)> TR.filter(fn tr(event: :call, mfa: {_, :sleepy_factorial, _}) -> true end) |> TR.pretty()
+[
+  %TR{
+    data: [3],
+    event: :call,
+    index: 5,
+    mfa: {Factorial, :sleepy_factorial, 1},
+    pid: #PID<0.206.0>,
+    ts: 1617540692495046
+  },
+  %TR{
+    data: [2],
+    event: :call,
+    index: 6,
+    mfa: {Factorial, :sleepy_factorial, 1},
+    pid: #PID<0.206.0>,
+    ts: 1617540692595598
+  },
+  %TR{
+    data: [1],
+    event: :call,
+    index: 7,
+    mfa: {Factorial, :sleepy_factorial, 1},
+    pid: #PID<0.206.0>,
+    ts: 1617540692696539
+  },
+  %TR{
+    data: [0],
+    event: :call,
+    index: 8,
+    mfa: {Factorial, :sleepy_factorial, 1},
+    pid: #PID<0.206.0>,
+    ts: 1617540692797458
+  }
+]
+```
