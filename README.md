@@ -219,7 +219,7 @@ To get a list of all modules from an appllication, use `TR.app_modules/1`.
 With `TR.filter/1` you can spot traces with a matching call:
 
 ```elixir
-iex(9)> TR.filter(fn tr(data: [2]) -> true end)
+iex(10)> TR.filter(fn tr(data: [2]) -> true end)
 [
   {:tr, 4, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [2],
    1617611701543483}
@@ -231,7 +231,7 @@ With `TR.filter_ranges/1` you can get all the traces between the matching call a
 
 ```elixir
 
-iex(9)> TR.filter_ranges(fn tr(data: [2]) -> true end)
+iex(11)> TR.filter_ranges(fn tr(data: [2]) -> true end)
 [
   [
     {:tr, 4, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [2],
@@ -253,7 +253,7 @@ iex(9)> TR.filter_ranges(fn tr(data: [2]) -> true end)
 To find the traceback (call stack trace) for matching call, you can use `TR.filter_tracebacks/1`:
 
 ```elixir
-iex(10)> TR.filter_tracebacks(fn tr(data: [2]) -> true end)
+iex(12)> TR.filter_tracebacks(fn tr(data: [2]) -> true end)
 [
   [
     {:tr, 1, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [5],
@@ -266,4 +266,17 @@ iex(10)> TR.filter_tracebacks(fn tr(data: [2]) -> true end)
      1617611701543483}
   ]
 ]
+```
+
+### Select
+
+`TR.select()` can be used to return all collected traces.
+
+`TR.select/1` accepts a function that is passed to [`:ets.fun2ms/1`](https://erlang.org/doc/man/ets.html#fun2ms-1).
+
+With `TR.select/1` you can limit the selection to specific items, and select only some fields from the record:
+
+```elixir
+iex(13)> TR.select(fn tr(data: [x], ts: ts) when is_integer(x) and x >= 2 -> {x, ts} end)
+[{3, 1617614561788930}, {2, 1617614561889523}]
 ```
