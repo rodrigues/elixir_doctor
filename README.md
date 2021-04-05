@@ -5,6 +5,9 @@ Thin library to help using [`erlang_doctor`](https://github.com/chrzaszcz/erlang
 `erlang_doctor` provides lightweight tracing, debugging and profiling,
 backed by `ets`.
 
+`elixir_doctor` provides a thin layer to ease make the library a bit
+more user-friendly from Elixir, but mostly delegates work to `erlang_doctor`.
+
 ## Installation
 
 Add `elixir_doctor` to your list of dependencies in `mix.exs`:
@@ -144,7 +147,8 @@ the traces to structs that are more introspectable / navigable, by using
 `TR.pretty/1` function:
 
 ```elixir
-iex(7)> TR.filter(fn tr(event: :call, mfa: {_, :sleepy_factorial, _}) -> true end) |> TR.pretty()
+iex(7)> TR.filter(fn tr(event: :call, mfa: {_, :sleepy_factorial, _}) -> true end) \
+...(7)>  |> TR.pretty()
 [
   %TR{
     data: [3],
