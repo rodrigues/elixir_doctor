@@ -3,7 +3,7 @@
 Thin library to help using [`erlang_doctor`](https://github.com/chrzaszcz/erlang_doctor) from Elixir.
 
 `erlang_doctor` provides lightweight tracing, debugging and profiling,
-backed by `ets`.
+backed by ETS.
 
 `elixir_doctor` provides a thin layer to ease make the library a bit
 more user-friendly from Elixir, but mostly delegates work to `erlang_doctor`.
@@ -20,7 +20,7 @@ def deps do
 end
 ```
 
-## Tracing function calls
+## Trace function calls
 
 See in `examples/factorial.exs` an example of a slow module.
 
@@ -65,6 +65,7 @@ iex(4)> TR.filter(fn _ -> true end)
    1617454845074004}
 ]
 ```
+
 The `TR.filter/1` call receives a predicate, in this case with `fn _ -> true end`
 all traces are returned.
 
@@ -106,7 +107,7 @@ It can be done like this:
 ```
 
 But that is very error-prone, not very ergonomic or future-proof,
-as the record can for instance get a new field over time.
+as the record can change over time.
 
 What is recommended is to import the module `TR`, using the `tr` macro
 to pattern match on the mfa:
@@ -139,11 +140,11 @@ Now we can see the traces for each recursive `:call` to the function,
 with argument `3`, `2`, `1` and `0`, and their respective returns, traced
 through the `:return_from` events, with return values `1`, `1`, `2`, and finally `6`.
 
-## Consume traces as structs
+### Consume traces as structs
 
-In Elixir, records are shown simply as tuples, that might be some times
-a bit harder to understand or manipulate. In case you need, you can convert
-the traces to structs that are more introspectable / navigable, by using
+In Elixir, records are shown simply as tuples, that might make them harder
+to understand or manipulate. In case you need, you can convert the traces
+to structs that are more introspectable and navigable, by using
 `TR.pretty/1` function:
 
 ```elixir
@@ -182,5 +183,87 @@ iex(7)> TR.filter(fn tr(event: :call, mfa: {_, :sleepy_factorial, _}) -> true en
     pid: #PID<0.206.0>,
     ts: 1617540692797458
   }
+]
+```
+
+### Stop tracing calls
+
+Stop tracing with the following function:
+
+```elixir
+iex(8)> TR.stop_tracing_calls()
+:ok
+```
+
+It's good to stop it as soon as possible to avoid accumulating too many traces in the ETS table.
+
+Usage of `TR` on production systems is risky, but if you have to do it, start and stop the tracer in the same command,
+e.g. for one second with:
+
+```
+iex(9)> TR.trace_calls([Factorial]); :timer.sleep(1_000); TR.stop_tracing_calls()
+:ok
+```
+
+### Tracing options
+
+You can pass a list of modules through `TR.trace_calls/1`.
+
+You can provide `{module, function, arity}` tuples in the list as well.
+
+To get a list of all modules from an appllication, use `TR.app_modules/1`.
+
+
+### Filters, Ranges, and Tracebacks
+
+With `TR.filter/1` you can spot traces with a matching call:
+
+```elixir
+iex(9)> TR.filter(fn tr(data: [2]) -> true end)
+[
+  {:tr, 4, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [2],
+   1617611701543483}
+]
+```
+
+With `TR.filter_ranges/1` you can get all the traces between the matching call and the corresponding return:
+
+
+```elixir
+
+iex(9)> TR.filter_ranges(fn tr(data: [2]) -> true end)
+[
+  [
+    {:tr, 4, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [2],
+     1617611701543483},
+    {:tr, 5, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [1],
+     1617611701644514},
+    {:tr, 6, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [0],
+     1617611701745594},
+    {:tr, 7, #PID<0.201.0>, :return_from, {DoctorDemo, :sleepy_factorial, 1}, 1,
+     1617611701846544},
+    {:tr, 8, #PID<0.201.0>, :return_from, {DoctorDemo, :sleepy_factorial, 1}, 1,
+     1617611701846548},
+    {:tr, 9, #PID<0.201.0>, :return_from, {DoctorDemo, :sleepy_factorial, 1}, 2,
+     1617611701846549}
+  ]
+]
+```
+
+To find the traceback (call stack trace) for matching call, you can use `TR.filter_tracebacks/1`:
+
+```elixir
+iex(10)> TR.filter_tracebacks(fn tr(data: [2]) -> true end)
+[
+  [
+    {:tr, 1, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [5],
+     1617611701240920},
+    {:tr, 2, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [4],
+     1617611701341551},
+    {:tr, 3, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [3],
+     1617611701442561},
+    {:tr, 4, #PID<0.201.0>, :call, {DoctorDemo, :sleepy_factorial, 1}, [2],
+     1617611701543483}
+  ]
 ]
 ```
