@@ -22,7 +22,7 @@ end
 
 ## Trace function calls
 
-See in `examples/factorial.exs` an example of a slow module.
+See in [`examples/factorial.exs`](https://github.com/rodrigues/elixir_doctor/blob/master/examples/factorial.exs) an example of a slow module.
 
 In the following `iex` session, we compile this module and trace its execution:
 
