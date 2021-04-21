@@ -66,23 +66,13 @@ iex(4)> TR.filter(fn _ -> true end)
 ]
 ```
 
-The `TR.filter/1` call receives a predicate, in this case with `fn _ -> true end`
-all traces are returned.
+The `TR.filter/1` call receives the predicate `fn _ -> true end`, which
+returns all filters.
 
-Each tracing entry returned a `:tr` record, a tuple with the following spec:
-
-```elixir
-{:tr,
-  index :: pos_integer(),
-  pid :: pid(),
-  event :: :call | :return_from | :exception_from,
-  mfa :: {atom(), atom(), non_neg_integer()},
-  data :: term(),
-  ts :: integer()}
-```
+Each tracing entry is a `:tr` record, a tuple specified in `TR.t/0` typespec.
 
 The first 4 entries of the list are related to 2 function calls made by iex
-itself, exploring module deprecations and macros:
+itself, checking for module deprecations and macros:
 
 ```elixir
 [{:tr, 1, #PID<0.192.0>, :call, {Factorial, :__info__, 1}, [:deprecated],
@@ -100,17 +90,9 @@ To ignore the traces for `Factorial.__info__(:deprecated)` and
 related to the `sleepy_factorial/1` function call, we should pattern
 match on the function name `:sleepy_factorial` in the mfa.
 
-It can be done like this:
+To pattern match on a record, you need to import the module `TR`, that
+defines the `tr/1` macro you can use for this purpose:
 
-```elixir
-> TR.filter(fn {:tr, _, _, _, {_, :sleepy_factorial, _}, _, _} -> true end)
-```
-
-But that is very error-prone, not very ergonomic or future-proof,
-as the record can change over time.
-
-What is recommended is to import the module `TR`, using the `tr` macro
-to pattern match on the mfa:
 
 ```elixir
 iex(5)> import TR
@@ -143,9 +125,9 @@ through the `:return_from` events, with return values `1`, `1`, `2`, and finally
 ### Consume traces as structs
 
 In Elixir, records are shown simply as tuples, that might make them harder
-to understand or manipulate. In case you need, you can convert the traces
-to structs that are more introspectable and navigable, by using
-`TR.pretty/1` function:
+to understand or manipulate in some cases.
+
+Trace records can be converted to structs through `TR.pretty/1` function:
 
 ```elixir
 iex(7)> TR.filter(fn tr(event: :call, mfa: {_, :sleepy_factorial, _}) -> true end) \
@@ -272,7 +254,7 @@ iex(12)> TR.filter_tracebacks(fn tr(data: [2]) -> true end)
 
 `TR.select()` can be used to return all collected traces.
 
-`TR.select/1` accepts a function that is passed to [`:ets.fun2ms/1`](https://erlang.org/doc/man/ets.html#fun2ms-1).
+`TR.select/1` accepts a function that [`:ets.fun2ms/1`](https://erlang.org/doc/man/ets.html#fun2ms-1) accepts. It will be compiled into a match specification that will be run by ETS.
 
 With `TR.select/1` you can limit the selection to specific items, and select only some fields from the record:
 
